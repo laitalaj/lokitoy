@@ -13,6 +13,8 @@ your-favourite-package-manager install snappy
 pip3 install -r requirements.txt
 ```
 
+On macOS, you might encounter some errors with installing python-snappy - [this stackoverflow answer](https://stackoverflow.com/questions/11416024/error-installing-python-snappy-snappy-c-h-no-such-file-or-directory/41707800#41707800) might help you in that case!
+
 3. Run loki locally
 
 ```
