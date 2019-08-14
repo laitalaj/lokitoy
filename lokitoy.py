@@ -154,7 +154,7 @@ if __name__ == '__main__':
         "max_build_time": 3,
         "min_chunk_size": 5,
         "max_chunk_size": 10,
-        "shared_labels": {"app": ['a', 'b', 'c', 'd', 'e', 'f']},
+        "shared_labels": {"app": ['h', 'i', 'j', 'k', 'l', 'm']},
         "uniq_labels": u,
         "dest": DEST
     } for u in uniq_labels]
