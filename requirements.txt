@@ -1,0 +1,4 @@
+randomwords
+requests
+protobuf
+python-snappy
