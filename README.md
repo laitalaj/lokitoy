@@ -1,6 +1,6 @@
 # lokitoy
 
-A script for reproducing some out-or-order peculiarities in loki.
+A script for reproducing some out-or-order peculiarities in [loki](https://github.com/grafana/loki).
 
 ## Usage
 
@@ -46,3 +46,4 @@ Check out the documentation comments in [lokitoy.py](./lokitoy.py) - they are qu
 but including `"app": ['h', 'i', 'j', 'k', 'l', 'm']` in addition to those results in errors.
 * If you use `['a', 'b', 'c', 'd', 'e', 'f']`, `["foo", "bar", "baz", "beep", "boop", "boom"]` or `["lokitest"]` as the selection for the `"app"` shared label,
 the errors don't seem to happen, but when you use `['h', 'i', 'j', 'k', 'l', 'm']`, the errors do happen
+* If you rename the `"app"` shared label to `"test"`, there are no errors
