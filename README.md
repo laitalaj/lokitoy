@@ -1,6 +1,7 @@
 # lokitoy
 
-A script for reproducing some out-or-order peculiarities in [loki](https://github.com/grafana/loki).
+A script for reproducing some out-or-order peculiarities in [loki](https://github.com/grafana/loki),
+and a tiny flask app for making sure that the script works correctly.
 
 ## Usage
 
@@ -34,6 +35,34 @@ python3 lokitoy.py
 
 ```
 CHUNK: {(...)}, RESULT: <Response [400]>, RESULT TEXT: entry out of order for stream: {app="m", uniq0="0", uniq1="0"}
+```
+
+Lokitoy now has some command line options! Try `python3 lokitoy.py --help` to see them.
+
+## Checking that the script actually sends stuff in order
+
+1. Make sure that you've installed the requirements
+
+2. Set the `FLASK_APP` environment variable to point to `lokimock.py`
+```
+export FLASK_APP=lokimock.py
+```
+
+3. Run lokimock with flask
+```
+flask run
+```
+
+4. Run lokitoy with the `--mock` flag
+```
+python3 lokitoy.py --mock
+```
+
+5. Watch the world *not* burn
+
+You can see that lokimock catches out-of-orders as it should by telling lokitoy to deliberately send stuff out-of-order:
+```
+python3 lokitoy.py --mock --deliberate-ooo
 ```
 
 ## Documentation

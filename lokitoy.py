@@ -1,11 +1,11 @@
+import argparse
 import itertools
 import random
 import random_words
 import requests
-import snappy as snappy
+import snappy
 import time
 import logproto_pb2
-from google.protobuf import timestamp_pb2
 import multiprocessing
 
 def gen_uniq_label_sets(label_count, options_count):
@@ -125,21 +125,40 @@ def log_loop(params):
         min_chunk_size, max_chunk_size: int, minimum and maxumum number of entries in each chunk
         shared_labels: dict of lists of strings, keys will be used as labels, and a random value is selected for the labels from the values
         uniq_labels: list of tuples of strings, the first entries in the tuples will be used as labels and the second entries as label values
-        dest: string, the URL to send logs to
+        dest: string, the URL to send logs to,
+        deliberate_ooo: boolean, makes log loop deliberately send some chunks out-of-order for testing purposes
     '''
+    send_later = None # This is used when lokitoy is told to out-of-order deliberately
+
     while True:
         build_time = params["min_build_time"] + random.random()*(params["max_build_time"] - params["min_build_time"])
         chunk_size = random.randint(params["min_chunk_size"], params["max_chunk_size"])
         chunk = build_chunk(params["shared_labels"], params["uniq_labels"], chunk_size, build_time)
         pr = chunk_to_push_request(chunk)
+
+        if params['deliberate_ooo'] and random.random() > 0.33:
+            # If we wish to deliberately out-of-order, store a push request with 33% chance
+            # and send an earlier push request instead of the just generated one
+            temp = send_later
+            send_later = pr
+            pr = temp
+            if pr is None: continue # There isn't an earlier push request, so don't send anything
+
         res = send_push_request(pr, params["dest"])
         if not res.ok:
             print("CHUNK: {}, RESULT: {}, RESULT TEXT: {}".format(chunk, res, res.text))
 
-DEST = "http://localhost:3100/api/prom/push"
-TIMEOUT = 60
-
 if __name__ == '__main__':
+    # 0. Parse some arguments and set some variables accordingly - see the help texts for info on what you can do with these!
+    parser = argparse.ArgumentParser(description='Reproducer for some out-of-order loki errors')
+    parser.add_argument('--mock', action='store_true', help='Set lokimock as the destination')
+    parser.add_argument('--deliberate-ooo', action='store_true', help='Deliberately do out-of-orders')
+    parser.add_argument('--timeout', type=int, default=60, help='Time to run lokitoy for in seconds, default 60')
+    args = parser.parse_args()
+
+    DEST = "http://localhost:5000/" if args.mock else "http://localhost:3100/api/prom/push"
+    TIMEOUT = args.timeout
+
     # 1. Create some unique label sets. For every process, this label set will be unique.
     # So, for example, with gen_uniq_label_sets(2, 2) there will be 4 processes.
     # Process 1 will have unique labels uniq0:"0",uniq1:"0", process 2 uniq0:"0",uniq1:"1",
@@ -156,7 +175,8 @@ if __name__ == '__main__':
         "max_chunk_size": 10,
         "shared_labels": {"app": ['h', 'i', 'j', 'k', 'l', 'm']},
         "uniq_labels": u,
-        "dest": DEST
+        "dest": DEST,
+        "deliberate_ooo": args.deliberate_ooo,
     } for u in uniq_labels]
 
     # 3. Create a process for each set of params

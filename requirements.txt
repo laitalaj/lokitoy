@@ -1,4 +1,6 @@
+flask
 randomwords
 requests
+sqlitedict
 protobuf
 python-snappy
