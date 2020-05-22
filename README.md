@@ -3,6 +3,10 @@
 A script for reproducing some out-or-order peculiarities in [loki](https://github.com/grafana/loki),
 and a tiny flask app for making sure that the script works correctly.
 
+**The guys at Loki eventually figured out that the out of order stuff was caused by a hash collision,
+and this should be fixed as of the latest versions of Loki.
+More info [here](https://github.com/grafana/loki/issues/898#issuecomment-552333246).**
+
 ## Usage
 
 1. Clone this repo
